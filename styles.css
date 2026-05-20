@@ -1,0 +1,387 @@
+:root {
+  --bg: #eef2f1;
+  --surface: #ffffff;
+  --surface-2: #f5f7f6;
+  --line: #d8ddd7;
+  --text: #17211b;
+  --muted: #637066;
+  --accent: #246b57;
+  --accent-strong: #164b3d;
+  --accent-soft: #dcebe5;
+  --warn: #8a4f28;
+  --shadow: 0 18px 50px rgba(28, 38, 31, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", "Malgun Gothic", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  cursor: pointer;
+}
+
+.app-shell {
+  width: min(1440px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 24px 0 36px;
+}
+
+.topbar {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  padding: 22px 24px;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 26px;
+  font-weight: 760;
+  letter-spacing: 0;
+}
+
+h2 {
+  font-size: 17px;
+  font-weight: 720;
+  letter-spacing: 0;
+}
+
+.topbar p {
+  color: var(--muted);
+  margin-top: 5px;
+}
+
+.primary-button {
+  align-items: center;
+  background: var(--accent);
+  border-radius: 8px;
+  color: #fff;
+  display: inline-flex;
+  font-weight: 760;
+  height: 54px;
+  justify-content: center;
+  min-width: 132px;
+  padding: 0 28px;
+}
+
+.primary-button:hover {
+  background: var(--accent-strong);
+}
+
+.ghost-button {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 650;
+  height: 34px;
+  padding: 0 12px;
+}
+
+.workspace {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(420px, 1.4fr) minmax(260px, 0.75fr);
+  margin-top: 16px;
+}
+
+.result-panel,
+.map-panel,
+.settings-panel,
+.table-panel,
+.history-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 10px 26px rgba(28, 38, 31, 0.08);
+}
+
+.result-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 320px;
+  padding: 22px;
+}
+
+.result-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.result-meta span {
+  background: var(--accent-soft);
+  border-radius: 999px;
+  color: var(--accent-strong);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 10px;
+}
+
+#resultName {
+  font-size: 34px;
+  line-height: 1.16;
+  margin: 24px 0;
+  word-break: keep-all;
+}
+
+.result-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.result-grid div,
+.metric-list div {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.result-grid span,
+.metric-list dt {
+  color: var(--muted);
+  display: block;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.result-grid strong,
+.metric-list dd {
+  display: block;
+  font-size: 20px;
+  font-weight: 760;
+  margin: 4px 0 0;
+}
+
+.map-panel {
+  min-height: 320px;
+  overflow: hidden;
+  padding: 12px;
+}
+
+#mapCanvas {
+  background:
+    linear-gradient(90deg, rgba(36, 107, 87, 0.06) 1px, transparent 1px),
+    linear-gradient(rgba(36, 107, 87, 0.06) 1px, transparent 1px),
+    #fbfcfa;
+  background-size: 52px 52px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: block;
+  height: 100%;
+  min-height: 296px;
+  width: 100%;
+}
+
+.settings-panel {
+  padding: 18px;
+}
+
+.panel-heading {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.control {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.control span {
+  color: var(--muted);
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.control input,
+.table-tools input,
+.table-tools select {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  height: 40px;
+  outline: none;
+  padding: 0 11px;
+  width: 100%;
+}
+
+.control input:focus,
+.table-tools input:focus,
+.table-tools select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(36, 107, 87, 0.14);
+}
+
+.metric-list {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr;
+  margin: 18px 0 0;
+}
+
+.lower-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.7fr);
+  margin-top: 16px;
+}
+
+.table-panel,
+.history-panel {
+  padding: 18px;
+}
+
+.table-tools {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 130px 220px;
+}
+
+.table-wrap {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  max-height: 460px;
+  overflow: auto;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--line);
+  padding: 10px 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 760;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+td:nth-child(3),
+td:nth-child(4) {
+  text-align: right;
+}
+
+tbody tr.is-picked {
+  background: var(--accent-soft);
+}
+
+#historyList {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#historyList li {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 11px 12px;
+}
+
+#historyList strong {
+  display: block;
+  font-size: 14px;
+}
+
+#historyList span {
+  color: var(--muted);
+  display: block;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+@media (max-width: 1100px) {
+  .workspace,
+  .lower-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .result-panel {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 680px) {
+  .app-shell {
+    width: min(100% - 20px, 1440px);
+    padding-top: 10px;
+  }
+
+  .topbar {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 18px;
+  }
+
+  .primary-button {
+    width: 100%;
+  }
+
+  #resultName {
+    font-size: 28px;
+  }
+
+  .result-grid,
+  .table-tools {
+    grid-template-columns: 1fr;
+  }
+
+  th,
+  td {
+    padding: 9px;
+  }
+}
