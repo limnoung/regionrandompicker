@@ -38,10 +38,12 @@
     scoredRegions: [],
     picked: null,
     history: loadHistory(),
+    simulationResults: [],
   };
 
   const elements = {
     pickButton: document.getElementById("pickButton"),
+    runSimulationButton: document.getElementById("runSimulationButton"),
     resetButton: document.getElementById("resetButton"),
     clearHistoryButton: document.getElementById("clearHistoryButton"),
     idealDistanceInput: document.getElementById("idealDistanceInput"),
@@ -62,6 +64,8 @@
     tableBody: document.getElementById("regionTableBody"),
     searchInput: document.getElementById("searchInput"),
     typeFilter: document.getElementById("typeFilter"),
+    simulationSummary: document.getElementById("simulationSummary"),
+    simulationList: document.getElementById("simulationList"),
     historyList: document.getElementById("historyList"),
     mapCanvas: document.getElementById("mapCanvas"),
   };
@@ -252,6 +256,27 @@
     `).join("");
   }
 
+  function renderSimulation() {
+    if (state.simulationResults.length === 0) {
+      elements.simulationSummary.textContent = "아직 실행하지 않았습니다";
+      elements.simulationList.innerHTML = "<li><strong>기록 없음</strong><span>100회 실행 전</span></li>";
+      return;
+    }
+
+    const topCount = state.simulationResults[0].count;
+    const topRegions = state.simulationResults
+      .filter((item) => item.count === topCount)
+      .map((item) => item.region.name)
+      .join(", ");
+    elements.simulationSummary.textContent = `최다 ${topCount}회 · ${topRegions}`;
+    elements.simulationList.innerHTML = state.simulationResults.map((item) => `
+      <li>
+        <strong>${item.region.fullName}</strong>
+        <span>${item.count}회 · ${item.count}% · 기준확률 ${item.region.probabilityPercent.toFixed(3)}%</span>
+      </li>
+    `).join("");
+  }
+
   function resizeCanvasForDisplay() {
     const canvas = elements.mapCanvas;
     const rect = canvas.getBoundingClientRect();
@@ -366,6 +391,23 @@
     drawMap();
   }
 
+  function onRunSimulation() {
+    const counts = new Map();
+
+    for (let index = 0; index < 100; index += 1) {
+      const picked = pickWeightedRandom();
+      const current = counts.get(picked.fullName);
+      counts.set(picked.fullName, {
+        region: picked,
+        count: (current ? current.count : 0) + 1,
+      });
+    }
+
+    state.simulationResults = Array.from(counts.values())
+      .sort((a, b) => b.count - a.count || b.region.probabilityPercent - a.region.probabilityPercent);
+    renderSimulation();
+  }
+
   function readSettingsFromInputs() {
     state.settings = {
       idealDistanceKm: Math.max(1, Number(elements.idealDistanceInput.value) || DEFAULT_SETTINGS.idealDistanceKm),
@@ -375,16 +417,21 @@
     };
     syncInputs();
     saveSettings();
+    state.simulationResults = [];
     recalculate();
+    renderSimulation();
   }
 
   function bindEvents() {
     elements.pickButton.addEventListener("click", onPick);
+    elements.runSimulationButton.addEventListener("click", onRunSimulation);
     elements.resetButton.addEventListener("click", () => {
       state.settings = { ...DEFAULT_SETTINGS };
       syncInputs();
       saveSettings();
+      state.simulationResults = [];
       recalculate();
+      renderSimulation();
     });
     elements.clearHistoryButton.addEventListener("click", () => {
       state.history = [];
@@ -412,6 +459,7 @@
     bindEvents();
     recalculate();
     renderHistory();
+    renderSimulation();
   }
 
   init();

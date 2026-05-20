@@ -128,6 +128,7 @@ h2 {
 .map-panel,
 .settings-panel,
 .table-panel,
+.simulation-panel,
 .history-panel {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -275,8 +276,14 @@ h2 {
 }
 
 .table-panel,
+.simulation-panel,
 .history-panel {
   padding: 18px;
+}
+
+.side-stack {
+  display: grid;
+  gap: 16px;
 }
 
 .table-tools {
@@ -324,7 +331,8 @@ tbody tr.is-picked {
   background: var(--accent-soft);
 }
 
-#historyList {
+#historyList,
+#simulationList {
   display: grid;
   gap: 8px;
   list-style: none;
@@ -332,23 +340,31 @@ tbody tr.is-picked {
   padding: 0;
 }
 
-#historyList li {
+#historyList li,
+#simulationList li {
   background: var(--surface-2);
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 11px 12px;
 }
 
-#historyList strong {
+#historyList strong,
+#simulationList strong {
   display: block;
   font-size: 14px;
 }
 
-#historyList span {
+#historyList span,
+#simulationList span,
+.simulation-summary {
   color: var(--muted);
   display: block;
   font-size: 12px;
   margin-top: 2px;
+}
+
+.simulation-summary {
+  margin: -8px 0 12px;
 }
 
 @media (max-width: 1100px) {
@@ -505,13 +521,24 @@ tbody tr.is-picked {
           </div>
         </section>
 
-        <section class="history-panel">
-          <div class="panel-heading">
-            <h2>최근 결과</h2>
-            <button id="clearHistoryButton" class="ghost-button" type="button">비우기</button>
-          </div>
-          <ol id="historyList"></ol>
-        </section>
+        <div class="side-stack">
+          <section class="simulation-panel">
+            <div class="panel-heading">
+              <h2>100회 결과</h2>
+              <button id="runSimulationButton" class="ghost-button" type="button">100회 실행</button>
+            </div>
+            <p id="simulationSummary" class="simulation-summary">아직 실행하지 않았습니다</p>
+            <ol id="simulationList"></ol>
+          </section>
+
+          <section class="history-panel">
+            <div class="panel-heading">
+              <h2>최근 결과</h2>
+              <button id="clearHistoryButton" class="ghost-button" type="button">비우기</button>
+            </div>
+            <ol id="historyList"></ol>
+          </section>
+        </div>
       </section>
     </main>
     <script>
@@ -1647,10 +1674,12 @@ window.CANDIDATE_REGIONS = [
     scoredRegions: [],
     picked: null,
     history: loadHistory(),
+    simulationResults: [],
   };
 
   const elements = {
     pickButton: document.getElementById("pickButton"),
+    runSimulationButton: document.getElementById("runSimulationButton"),
     resetButton: document.getElementById("resetButton"),
     clearHistoryButton: document.getElementById("clearHistoryButton"),
     idealDistanceInput: document.getElementById("idealDistanceInput"),
@@ -1671,6 +1700,8 @@ window.CANDIDATE_REGIONS = [
     tableBody: document.getElementById("regionTableBody"),
     searchInput: document.getElementById("searchInput"),
     typeFilter: document.getElementById("typeFilter"),
+    simulationSummary: document.getElementById("simulationSummary"),
+    simulationList: document.getElementById("simulationList"),
     historyList: document.getElementById("historyList"),
     mapCanvas: document.getElementById("mapCanvas"),
   };
@@ -1861,6 +1892,27 @@ window.CANDIDATE_REGIONS = [
     `).join("");
   }
 
+  function renderSimulation() {
+    if (state.simulationResults.length === 0) {
+      elements.simulationSummary.textContent = "아직 실행하지 않았습니다";
+      elements.simulationList.innerHTML = "<li><strong>기록 없음</strong><span>100회 실행 전</span></li>";
+      return;
+    }
+
+    const topCount = state.simulationResults[0].count;
+    const topRegions = state.simulationResults
+      .filter((item) => item.count === topCount)
+      .map((item) => item.region.name)
+      .join(", ");
+    elements.simulationSummary.textContent = `최다 ${topCount}회 · ${topRegions}`;
+    elements.simulationList.innerHTML = state.simulationResults.map((item) => `
+      <li>
+        <strong>${item.region.fullName}</strong>
+        <span>${item.count}회 · ${item.count}% · 기준확률 ${item.region.probabilityPercent.toFixed(3)}%</span>
+      </li>
+    `).join("");
+  }
+
   function resizeCanvasForDisplay() {
     const canvas = elements.mapCanvas;
     const rect = canvas.getBoundingClientRect();
@@ -1975,6 +2027,23 @@ window.CANDIDATE_REGIONS = [
     drawMap();
   }
 
+  function onRunSimulation() {
+    const counts = new Map();
+
+    for (let index = 0; index < 100; index += 1) {
+      const picked = pickWeightedRandom();
+      const current = counts.get(picked.fullName);
+      counts.set(picked.fullName, {
+        region: picked,
+        count: (current ? current.count : 0) + 1,
+      });
+    }
+
+    state.simulationResults = Array.from(counts.values())
+      .sort((a, b) => b.count - a.count || b.region.probabilityPercent - a.region.probabilityPercent);
+    renderSimulation();
+  }
+
   function readSettingsFromInputs() {
     state.settings = {
       idealDistanceKm: Math.max(1, Number(elements.idealDistanceInput.value) || DEFAULT_SETTINGS.idealDistanceKm),
@@ -1984,16 +2053,21 @@ window.CANDIDATE_REGIONS = [
     };
     syncInputs();
     saveSettings();
+    state.simulationResults = [];
     recalculate();
+    renderSimulation();
   }
 
   function bindEvents() {
     elements.pickButton.addEventListener("click", onPick);
+    elements.runSimulationButton.addEventListener("click", onRunSimulation);
     elements.resetButton.addEventListener("click", () => {
       state.settings = { ...DEFAULT_SETTINGS };
       syncInputs();
       saveSettings();
+      state.simulationResults = [];
       recalculate();
+      renderSimulation();
     });
     elements.clearHistoryButton.addEventListener("click", () => {
       state.history = [];
@@ -2021,6 +2095,7 @@ window.CANDIDATE_REGIONS = [
     bindEvents();
     recalculate();
     renderHistory();
+    renderSimulation();
   }
 
   init();
